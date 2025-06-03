@@ -1,0 +1,125 @@
+#include <Servo.h> 
+
+Servo servo1; // Membuat objek servo bernama servo1
+
+// Motor depan via L293D 
+const int motorKanan1A = 8, motorKanan1AA = 6; // motor kiri depan
+const int motorKanan1B = 7, motorKanan1BB = 5; // motor kanan depan
+
+// Motor belakang via L293D 
+const int motorKanan2A = 4, motorKanan2AA = 3; // motor kiri belakang
+const int motorKanan2B = 2, motorKanan2BB = 12; // motor kanan belakang
+
+// pin stepper
+const int motorKiriA = 11, motorKiriB = 9;
+
+int incomingByte = 0, sudutservo; // menyimpan data serial dan sudut servo 
+
+void setup() { // fungsi wajib arduino
+  Serial.begin(9600); // membuka serial monitor
+
+  // pin servo
+  servo1.attach(13);
+
+  // mengatur pin motor sebagai output
+  pinMode(motorKanan1A, OUTPUT);
+  pinMode(motorKanan1AA, OUTPUT);
+  pinMode(motorKanan1B, OUTPUT);
+  pinMode(motorKanan1BB, OUTPUT);
+  pinMode(motorKanan2A, OUTPUT);
+  pinMode(motorKanan2AA, OUTPUT);
+  pinMode(motorKanan2B, OUTPUT);
+  pinMode(motorKanan2BB, OUTPUT);
+
+  // stepper
+  pinMode(motorKiriA, OUTPUT);
+  pinMode(motorKiriB, OUTPUT);
+
+  // Servo ke posisi awal
+  servo1.write(0);
+}
+
+void loop() { // fungsi berulang 
+
+   if (Serial.available() > 0) {
+        incomingByte = Serial.read();
+        Serial.print("robot meluncur: "); // teks serial monitor
+        Serial.println(incomingByte, DEC); 
+   }
+  switch (incomingByte) {
+      case 49:
+    	digitalWrite(motorKanan1A, LOW);
+    	digitalWrite(motorKanan1AA, HIGH); // motor 1
+    	digitalWrite(motorKanan2A, LOW);
+    	digitalWrite(motorKanan2AA, HIGH); // motor 3
+    	digitalWrite(motorKanan1B, LOW);
+    	digitalWrite(motorKanan1BB, HIGH); //motor 4
+    	digitalWrite(motorKanan2B, LOW);
+    	digitalWrite(motorKanan2BB, HIGH); //motor 2
+        Serial.println("motor mundur");
+        break;
+      case 50:
+        digitalWrite(motorKanan1A, HIGH);
+    	digitalWrite(motorKanan1AA, LOW); // motor 1
+    	digitalWrite(motorKanan2A, HIGH);
+    	digitalWrite(motorKanan2AA, LOW); // motor 3
+    	digitalWrite(motorKanan1B, HIGH);
+    	digitalWrite(motorKanan1BB, LOW); //motor 4
+    	digitalWrite(motorKanan2B, HIGH);
+    	digitalWrite(motorKanan2BB, LOW); //motor 2
+        Serial.println("motor maju");
+        break;
+    
+    case 51:
+        digitalWrite(motorKanan1A, LOW);
+    	digitalWrite(motorKanan1AA, LOW); // motor 1
+    	digitalWrite(motorKanan2A, LOW);
+    	digitalWrite(motorKanan2AA, LOW); // motor 3
+    	digitalWrite(motorKanan1B, LOW);
+    	digitalWrite(motorKanan1BB, HIGH); //motor 4
+    	digitalWrite(motorKanan2B, LOW);
+    	digitalWrite(motorKanan2BB, HIGH); //motor 2
+        Serial.println("motor kanan");
+        break;
+      case 52:
+        digitalWrite(motorKanan1A, HIGH);
+    	digitalWrite(motorKanan1AA, LOW); // motor 1
+    	digitalWrite(motorKanan2A, HIGH);
+    	digitalWrite(motorKanan2AA, LOW); // motor 3
+    	digitalWrite(motorKanan1B, LOW);
+    	digitalWrite(motorKanan1BB, LOW); //motor 4
+    	digitalWrite(motorKanan2B, LOW);
+    	digitalWrite(motorKanan2BB, LOW); //motor 
+        Serial.println("motor kiri");
+        break;
+    
+    case 53:
+    	if(sudutservo >= 0) {
+      		sudutservo --;
+    	}
+    Serial.println("servo capit");
+        break;
+     case 54:
+    	if(sudutservo <= 180) {
+      		sudutservo ++;
+    	}
+    Serial.println("servo buka");
+        break;
+  
+     case 55:
+        digitalWrite(motorKiriA, HIGH);
+    	digitalWrite(motorKiriB, LOW); // stepper
+        Serial.println("stepper naik");
+        break;
+     case 56:
+    	digitalWrite(motorKiriA, LOW);
+    	digitalWrite(motorKiriB, HIGH); // stepper
+        Serial.println("stepper turun");
+        break;
+    default: 
+        Serial.println("motor diam");
+        break;
+      }
+  
+  	servo1.write(sudutservo); // menggerakkan servo sudut baru
+}
